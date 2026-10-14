@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eatwise — Eat smarter. Waste less.</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--card:#fff;--ink:#16301f;--mut:#566b5d;--g:#1f5d3a;--on:#fff;--g2:#e4f3ea;--line:#cfe3d6;--red:#b3261e;--redbg:#fbe7e5;--amb:#7a4f00;--ambbg:#fff0cf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{margin:0;font-family:Georgia,"Times New Roman",serif;line-height:1.25}
+h2{font-size:22px;margin-bottom:12px}h3{font-size:17px;margin-bottom:8px}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--g);color:var(--on)}
+.top .wrap{padding-top:10px;padding-bottom:10px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.brand h1{font-size:24px}.brand span{opacity:.85;font-size:14px}
+nav{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
+nav button{flex:0 0 auto;border:0;border-radius:99px;padding:8px 14px;min-height:40px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:transparent;color:var(--on)}
+nav button[aria-current="page"]{background:var(--card);color:var(--g)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:12px}
+.grid .card{margin:0}.num{font:700 32px Georgia,serif;color:var(--g)}.mut{color:var(--mut);font-size:14px}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.grow{flex:1 1 180px;min-width:0;word-break:break-word}
+.item{border-top:1px solid var(--line);padding:12px 0}.item:first-of-type{border-top:0}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 14px;min-height:40px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.btn.p{background:var(--g);color:var(--on);border-color:var(--g)}.btn.d{color:var(--red)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #e0a800;outline-offset:2px}
+input,select{width:100%;padding:9px 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.fld{margin-bottom:12px;min-width:0}.two{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.err{color:var(--red);font-size:13px;margin-top:4px}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.badge.r{background:var(--redbg);color:var(--red)}.badge.a{background:var(--ambbg);color:var(--amb)}.badge.g{background:var(--g2);color:var(--g)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;min-height:36px;font:inherit;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--g);color:var(--on);border-color:var(--g)}
+.note{background:var(--g2);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+.tools{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;margin-bottom:12px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;padding:12px;overflow:auto;z-index:30}
+.sheet{width:100%;max-width:460px;margin:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--g);color:var(--on);padding:10px 18px;border-radius:99px;z-index:40;font-size:14px;max-width:90vw}
+details summary{cursor:pointer;font-weight:600;color:var(--g);margin-top:8px}
+ol{margin:6px 0 0;padding-left:20px}
+.done{text-decoration:line-through;opacity:.65}
+@media (max-width:560px){.tools{grid-template-columns:1fr}.two{grid-template-columns:1fr 1fr}.brand h1{font-size:21px}}
+</style></head>
+<body><div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+const {useState,useEffect}=React;const html=htm.bind(React.createElement);
+const CATS=['Vegetables','Fruits','Dairy & Eggs','Grains & Pulses','Bakery','Snacks & Other'];
+const UN=['g','kg','ml','l','pcs','pack'];
+const F={g:['m',1],kg:['m',1e3],ml:['v',1],l:['v',1e3],pcs:['c',1],pack:['k',1]};
+const KEY='eatwise-v1';
+const pd=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(s||'');if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return d.getMonth()===+m[2]-1?d:null};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const tmid=()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())};
+const addD=n=>{const t=tmid();t.setDate(t.getDate()+n);return iso(t)};
+const dl=(e,t)=>Math.round((pd(e)-t)/864e5);
+const st=(e,t)=>{const d=dl(e,t);return d<0?{k:'Expired',c:'r',d}:d===0?{k:'Expiring today',c:'a',d}:d<=3?{k:'Expiring soon',c:'a',d}:{k:'Fresh',c:'g',d}};
+const dtxt=d=>d<0?`${-d} day${d<-1?'s':''} ago`:d===0?'today':`in ${d} day${d>1?'s':''}`;
+const nm=s=>s.trim().toLowerCase().replace(/s$/,'');
+const r2=n=>Math.round(n*100)/100;
+const alt=(n,u)=>n<1&&u==='kg'?` (${r2(n*1e3)} g)`:n<1&&u==='l'?` (${r2(n*1e3)} ml)`:'';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const vq=s=>/^\d+(\.\d{1,2})?$/.test(String(s).trim())&&+s>0&&+s<=1e5;
+const stock=(inv,g,t)=>{let found=false,have=0,us=[];inv.forEach(i=>{if(nm(i.name)===nm(g.name)&&dl(i.exp,t)>=0){found=true;us.push(i.qty+' '+i.unit);if(F[i.unit][0]===F[g.unit][0])have+=i.qty*F[i.unit][1]}});return{found,have,us}};
+const gs=(inv,g,t)=>{const {found,have,us}=stock(inv,g,t),f=F[g.unit][1],need=g.qty*f;
+ if(have>=need)return{k:'Already in stock',c:'g',rem:0,note:`Have ${r2(have/f)} ${g.unit}`};
+ if(have>0)return{k:'Partially available',c:'a',rem:r2((need-have)/f),note:`Have ${r2(have/f)} ${g.unit}`};
+ return{k:'Need to buy',c:'r',rem:g.qty,note:found?`In stock as ${us.join(' + ')}. Change the unit to compare.`:''}};
+let LS=true;try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){LS=false}
+const seed=()=>({inv:[
+ {id:uid()+'a',name:'Milk',cat:'Dairy & Eggs',qty:1,unit:'l',exp:addD(2)},
+ {id:uid()+'b',name:'Rice',cat:'Grains & Pulses',qty:500,unit:'g',exp:addD(200)},
+ {id:uid()+'c',name:'Eggs',cat:'Dairy & Eggs',qty:6,unit:'pcs',exp:addD(5)},
+ {id:uid()+'d',name:'Tomato',cat:'Vegetables',qty:400,unit:'g',exp:addD(1)},
+ {id:uid()+'e',name:'Onion',cat:'Vegetables',qty:3,unit:'pcs',exp:addD(14)},
+ {id:uid()+'f',name:'Yogurt',cat:'Dairy & Eggs',qty:1,unit:'pack',exp:addD(-1)}],gro:[]});
+const init=(()=>{if(LS){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.inv)&&Array.isArray(s.gro))return s}catch(e){}}return seed()})();
+const R=[
+['Spinach Omelette',15,['egg','spinach','onion'],'Chop the onion and spinach.|Saute onion for 2 minutes, then wilt the spinach.|Pour in beaten eggs with salt and pepper.|Cook 3-4 minutes, fold and serve.'],
+['Egg Bhurji',15,['egg','onion','tomato'],'Saute chopped onion until soft.|Add tomato and spices, cook 3 minutes.|Pour in beaten eggs and scramble.|Serve with bread or roti.'],
+['Masala Egg Curry',30,['egg','onion','tomato'],'Hard-boil the eggs, peel and halve them.|Cook onion and tomato with spices into a masala.|Add a cup of water and simmer 8 minutes.|Add the eggs and simmer 3 minutes.'],
+['Palak Paneer',30,['spinach','paneer','onion','tomato'],'Blanch the spinach and blend to a puree.|Saute onion and tomato with spices.|Add the puree and simmer 5 minutes.|Stir in paneer cubes and cook 3 minutes.'],
+['Vegetable Fried Rice',20,['rice','carrot','peas','onion'],'Cook rice and let it cool.|Stir-fry onion, carrot and peas on high heat.|Add the rice, soy sauce and salt.|Toss for 3 minutes and serve.'],
+['Dal Tadka',35,['lentil/dal','onion','tomato'],'Boil washed dal until soft.|Fry onion and tomato with cumin.|Stir the tadka into the dal.|Simmer 5 minutes and serve.'],
+['Tomato Pasta',25,['pasta','tomato','onion'],'Boil the pasta until al dente.|Cook onion and tomato into a sauce.|Toss the pasta in the sauce.|Season and serve.'],
+['Aloo Sabzi',30,['potato','onion','tomato'],'Boil and cube the potatoes.|Saute onion and tomato with spices.|Add the potatoes and mix well.|Cook 5 minutes and serve.'],
+['Rice Kheer',40,['milk','rice','sugar'],'Simmer milk in a heavy pan.|Add washed rice and cook on low heat.|Stir often for about 30 minutes until thick.|Sweeten with sugar and serve warm.'],
+['Cabbage Carrot Stir-fry',15,['cabbage','carrot','onion'],'Slice the vegetables thinly.|Heat oil and fry onion 2 minutes.|Add cabbage and carrot, cook on high 5 minutes.|Season with salt and pepper.']];
+const has=(l,ing)=>ing.split('/').some(a=>l.some(s=>s.includes(a)||a.includes(s)));
+
+const Badge=({s})=>html`<span class=${'badge '+s.c}>${s.k}</span>`;
+const Fld=({l,id,err,children})=>html`<div class="fld"><label for=${id}>${l}</label>${children}${err&&html`<div class="err" role="alert">${err}</div>`}</div>`;
+
+function ItemForm({init,onSave,onClose,t}){
+ const [f,setF]=useState(init),[e,setE]=useState({});
+ const set=k=>ev=>setF({...f,[k]:ev.target.value});
+ const submit=ev=>{ev.preventDefault();const er={};
+  if(!f.name.trim())er.name='Name is required';else if(f.name.trim().length>40)er.name='Max 40 characters';
+  if(!vq(f.qty))er.qty='Enter a number above 0 (max 2 decimals)';
+  if(!f.exp)er.exp='Expiry date is required';else if(!pd(f.exp)||dl(f.exp,t)<-365||dl(f.exp,t)>3650)er.exp='Enter a valid date (up to 1 year ago, up to 10 years ahead)';
+  setE(er);if(Object.keys(er).length)return;onSave({name:f.name.trim(),cat:f.cat,qty:+f.qty,unit:f.unit,exp:f.exp})};
+ return html`<form onSubmit=${submit} noValidate>
+  <${Fld} l="Food name" id="fn" err=${e.name}><input id="fn" value=${f.name} onChange=${set('name')} aria-invalid=${!!e.name} maxLength="60" autoFocus/><//>
+  <${Fld} l="Category" id="fc"><select id="fc" value=${f.cat} onChange=${set('cat')}>${CATS.map(c=>html`<option key=${c}>${c}</option>`)}</select><//>
+  <div class="two"><${Fld} l="Quantity" id="fq" err=${e.qty}><input id="fq" inputMode="decimal" value=${f.qty} onChange=${set('qty')} aria-invalid=${!!e.qty}/><//>
+  <${Fld} l="Unit" id="fu"><select id="fu" value=${f.unit} onChange=${set('unit')}>${UN.map(c=>html`<option key=${c}>${c}</option>`)}</select><//></div>
+  <${Fld} l="Expiry date" id="fe" err=${e.exp}><input id="fe" type="date" value=${f.exp} onChange=${set('exp')} aria-invalid=${!!e.exp}/><//>
+  <p class="mut">Past dates are allowed and will show as Expired.</p>
+  <div class="row"><button type="button" class="btn" onClick=${onClose}>Cancel</button><button class="btn p">Save</button></div></form>`}
+
+function ItemRow({i,t,onEdit,onDel}){
+ const [c,setC]=useState(false),s=st(i.exp,t);
+ return html`<div class="item row"><div class="grow"><strong>${i.name}</strong><div class="mut">${i.qty} ${i.unit} · ${i.cat}</div><div class="mut">Expires ${i.exp} (${dtxt(s.d)})</div></div>
+ <div class="row"><${Badge} s=${s}/><button class="btn" onClick=${()=>onEdit(i)} aria-label=${'Edit '+i.name}>Edit</button>
+ ${c?html`<button class="btn d" onClick=${()=>onDel(i)}>Confirm delete</button><button class="btn" onClick=${()=>setC(false)}>Keep</button>`:html`<button class="btn d" onClick=${()=>setC(true)} aria-label=${'Delete '+i.name}>Delete</button>`}</div></div>`}
+
+function Inventory({inv,t,onAdd,onEdit,onDel}){
+ const [q,setQ]=useState(''),[c,setC]=useState('All');
+ const list=inv.filter(i=>(c==='All'||i.cat===c)&&i.name.toLowerCase().includes(q.trim().toLowerCase())).sort((a,b)=>a.exp<b.exp?-1:1);
+ return html`<h2>Food inventory</h2><div class="tools">
+ <input aria-label="Search food" placeholder="Search by name" value=${q} onChange=${e=>setQ(e.target.value)}/>
+ <select aria-label="Filter by category" value=${c} onChange=${e=>setC(e.target.value)}><option>All</option>${CATS.map(x=>html`<option key=${x}>${x}</option>`)}</select>
+ <button class="btn p" onClick=${onAdd}>+ Add food</button></div>
+ <div class="card">${list.length?list.map(i=>html`<${ItemRow} key=${i.id} i=${i} t=${t} onEdit=${onEdit} onDel=${onDel}/>`):html`<p class="mut">${inv.length?'No items match your search or filter.':'Your inventory is empty. Add your first food item.'}</p>`}</div>`}
+
+function Expiry({inv,t,onEdit,onDel}){
+ const G=['Expired','Expiring today','Expiring soon','Fresh'];
+ return html`<h2>Expiry tracker</h2><div class="note">🔔 In-app reminders only: these warnings appear while Eatwise is open. They are not phone notifications. Status is recalculated from today's date (${iso(t)}).</div>
+ ${G.map(g=>{const l=inv.filter(i=>st(i.exp,t).k===g).sort((a,b)=>a.exp<b.exp?-1:1);return l.length?html`<div class="card" key=${g}><h3>${g} (${l.length})</h3>${l.map(i=>html`<${ItemRow} key=${i.id} i=${i} t=${t} onEdit=${onEdit} onDel=${onDel}/>`)}</div>`:null})}
+ ${!inv.length&&html`<p class="mut">No items yet.</p>`}`}
+
+function Recipes({inv,t}){
+ const [sel,setSel]=useState([]),[x,setX]=useState('');
+ const m=new Map(inv.filter(i=>dl(i.exp,t)>=0).map(i=>[i.name.trim().toLowerCase(),i.name.trim()]));
+ sel.forEach(k=>{if(!m.has(k))m.set(k,k)});
+ const soon=inv.filter(i=>{const d=dl(i.exp,t);return d>=0&&d<=3}).map(i=>i.name.trim().toLowerCase());
+ const tog=k=>setSel(sel.includes(k)?sel.filter(s=>s!==k):[...sel,k]);
+ const add=ev=>{ev.preventDefault();const k=x.trim().toLowerCase();if(k&&k.length<=40&&!sel.includes(k))setSel([...sel,k]);setX('')};
+ const res=R.map(([n,time,ing,steps])=>{const have=ing.filter(a=>has(sel,a)),miss=ing.filter(a=>!has(sel,a)),urg=have.filter(a=>has(soon,a));return{n,time,ing,steps:steps.split('|'),have,miss,urg}})
+  .filter(r=>r.have.length).sort((a,b)=>b.urg.length-a.urg.length||a.miss.length-b.miss.length||a.time-b.time);
+ const lab=a=>a.replace('/',' / ');
+ return html`<h2>Recipe suggestions</h2>
+ <div class="note">Suggestions come from Eatwise's built-in vegetarian and egg recipe list using simple ingredient-matching rules. No live AI service is used. Salt, oil, water and common spices are assumed.</div>
+ <div class="card"><h3>What do you have at home?</h3>
+ <div class="chips">${[...m].map(([k,v])=>html`<button key=${k} class="chip" aria-pressed=${sel.includes(k)} onClick=${()=>tog(k)}>${v}</button>`)}${!m.size&&html`<span class="mut">Add food to your inventory or type an ingredient below.</span>`}</div>
+ <form class="row" onSubmit=${add}><div class="grow"><input aria-label="Add another ingredient" placeholder="Add another ingredient" value=${x} onChange=${e=>setX(e.target.value)}/></div><button class="btn">Add</button>
+ <button type="button" class="btn" onClick=${()=>setSel([...new Set([...sel,...soon])])}>Select expiring food</button><button type="button" class="btn" onClick=${()=>setSel([])}>Clear</button></form></div>
+ ${!sel.length?html`<p class="mut">Select at least one ingredient to see recipes.</p>`:!res.length?html`<p class="mut">No built-in recipe uses these ingredients yet. Try selecting more.</p>`:res.map(r=>html`<div class="card" key=${r.n}><div class="row"><h3>${r.n}</h3><span class="mut">⏱ ${r.time} min · ${r.have.length}/${r.ing.length} ingredients</span></div>
+ ${r.urg.length>0&&html`<p><span class="badge a">Uses food expiring soon</span> <span class="mut">${r.urg.map(lab).join(', ')}</span></p>`}
+ <p class="mut"><strong>Ingredients:</strong> ${r.ing.map(lab).join(', ')}</p>
+ <p class="mut"><strong>Missing:</strong> ${r.miss.length?r.miss.map(lab).join(', '):'Nothing, you have it all!'}</p>
+ <details><summary>Preparation steps</summary><ol>${r.steps.map((s,i)=>html`<li key=${i}>${s}</li>`)}</ol></details></div>`)}`}
+
+function Grocery({gro,setGro,inv,t,onBuy,flash}){
+ const blank={name:'',qty:'',unit:'pcs'};
+ const [f,setF]=useState(blank),[eid,setEid]=useState(null),[e,setE]=useState({}),[ut,setUt]=useState(false);
+ const submit=ev=>{ev.preventDefault();const er={},n=f.name.trim();
+  if(!n)er.name='Name is required';else if(n.length>40)er.name='Max 40 characters';else if(gro.some(g=>!g.bought&&g.id!==eid&&nm(g.name)===nm(n)))er.name='Already on your list. Edit that item instead.';
+  if(!vq(f.qty))er.qty='Enter a number above 0 (max 2 decimals)';
+  setE(er);if(Object.keys(er).length)return;
+  const it={name:n,qty:+f.qty,unit:f.unit};
+  if(eid)setGro(gro.map(g=>g.id===eid?{...g,...it}:g));else setGro([{...it,id:uid(),bought:false},...gro]);
+  flash(eid?'Grocery item updated':'Added to grocery list');setF(blank);setUt(false);setEid(null)};
+ const mine=f.name.trim()?inv.filter(i=>nm(i.name)===nm(f.name)&&dl(i.exp,t)>=0):[];
+ return html`<h2>Smart grocery list</h2>
+ <form class="card" onSubmit=${submit} noValidate><h3>${eid?'Edit item':'Add item'}</h3>
+ <${Fld} l="Item name" id="gn" err=${e.name}><input id="gn" value=${f.name} onChange=${ev=>{const n=ev.target.value,h=inv.find(i=>nm(i.name)===nm(n)&&dl(i.exp,t)>=0);setF({...f,name:n,unit:h&&!ut?h.unit:f.unit})}} aria-invalid=${!!e.name}/><//>
+ <div class="two"><${Fld} l="Quantity needed" id="gq" err=${e.qty}><input id="gq" inputMode="decimal" value=${f.qty} onChange=${ev=>setF({...f,qty:ev.target.value})} aria-invalid=${!!e.qty}/><//>
+ <${Fld} l="Unit" id="gu"><select id="gu" value=${f.unit} onChange=${ev=>{setUt(true);setF({...f,unit:ev.target.value})}}>${UN.map(c=>html`<option key=${c}>${c}</option>`)}</select><//></div>
+ ${mine.length>0&&html`<p class="mut">In stock: ${mine.map(i=>i.qty+' '+i.unit).join(' + ')}</p>`}
+ <div class="row"><button class="btn p">${eid?'Save changes':'Add to list'}</button>${eid&&html`<button type="button" class="btn" onClick=${()=>{setEid(null);setF(blank);setUt(false);setE({})}}>Cancel edit</button>`}</div></form>
+ <div class="card">${gro.length?gro.map(g=>{const s=g.bought?null:gs(inv,g,t);return html`<div class="item row" key=${g.id}><div class="grow"><strong class=${g.bought?'done':''}>${g.name}</strong> <span class="mut">${g.qty} ${g.unit}</span>
+ ${g.bought?html`<div class="mut">Purchased and added to inventory</div>`:html`<div class="mut">${s.note}${s.note&&s.rem>0?' · ':''}${s.rem>0?`Still need ${s.rem} ${g.unit}${alt(s.rem,g.unit)}`:''}</div>`}</div>
+ <div class="row">${g.bought?html`<span class="badge g">Purchased</span>`:html`<${Badge} s=${s}/><button class="btn p" onClick=${()=>onBuy(g,s.rem)}>Mark purchased</button><button class="btn" onClick=${()=>{setEid(g.id);setUt(true);setF({name:g.name,qty:String(g.qty),unit:g.unit});setE({})}}>Edit</button>`}
+ <button class="btn d" onClick=${()=>{setGro(gro.filter(x=>x.id!==g.id));if(eid===g.id){setEid(null);setF(blank);setUt(false)}flash('Removed from list')}} aria-label=${'Remove '+g.name}>Remove</button></div></div>`}):html`<p class="mut">Your grocery list is empty.</p>`}</div>`}
+
+function Dash({inv,gro,t,go,onAdd}){
+ const urgent=inv.filter(i=>dl(i.exp,t)<=3).sort((a,b)=>a.exp<b.exp?-1:1);
+ const soon=inv.filter(i=>{const d=dl(i.exp,t);return d>=0&&d<=3}).length,exp=inv.filter(i=>dl(i.exp,t)<0).length;
+ const need=gro.filter(g=>!g.bought&&gs(inv,g,t).k!=='Already in stock').length;
+ const S=[[inv.length,'Items in inventory'],[soon,'Expiring soon (3 days)'],[exp,'Expired'],[need,'Groceries still needed']];
+ return html`<h2>Dashboard</h2><div class="grid">${S.map(([n,l])=>html`<div class="card" key=${l}><div class="num">${n}</div><div class="mut">${l}</div></div>`)}</div>
+ <div class="card"><h3>Quick actions</h3><div class="row" style=${{justifyContent:'flex-start'}}><button class="btn p" onClick=${onAdd}>+ Add food</button><button class="btn" onClick=${()=>go('rec')}>Find recipes</button><button class="btn" onClick=${()=>go('gro')}>Open grocery list</button></div></div>
+ <div class="card"><h3>Use these first</h3><p class="mut">🔔 In-app reminders, not phone notifications.</p>
+ ${urgent.length?urgent.slice(0,6).map(i=>{const s=st(i.exp,t);return html`<div class="item row" key=${i.id}><div class="grow"><strong>${i.name}</strong><div class="mut">${i.qty} ${i.unit} · ${dtxt(s.d)}</div></div><${Badge} s=${s}/></div>`}):html`<p class="mut">Nothing is expiring in the next 3 days. Nice work!</p>`}
+ ${urgent.length>6&&html`<button class="btn" onClick=${()=>go('exp')}>See all ${urgent.length}</button>`}</div>`}
+
+function App(){
+ const [t,setT]=useState(tmid),[v,setV]=useState('home'),[inv,setInv]=useState(init.inv),[gro,setGro]=useState(init.gro);
+ const [m,setM]=useState(null),[msg,setMsg]=useState(''),[ls,setLs]=useState(LS),[rs,setRs]=useState(false);
+ useEffect(()=>{const h=setInterval(()=>{const n=tmid();if(+n!==+t)setT(n)},30000);return()=>clearInterval(h)},[t]);
+ useEffect(()=>{if(!ls)return;try{localStorage.setItem(KEY,JSON.stringify({inv,gro}))}catch(e){setLs(false)}},[inv,gro,ls]);
+ useEffect(()=>{if(!msg)return;const h=setTimeout(()=>setMsg(''),2500);return()=>clearTimeout(h)},[msg]);
+ const blank={name:'',cat:CATS[0],qty:'',unit:'pcs',exp:''};
+ const openAdd=()=>setM({key:uid(),title:'Add food',init:blank});
+ const openEdit=i=>setM({key:i.id,id:i.id,title:'Edit food',init:{...i,qty:String(i.qty)}});
+ const del=i=>{setInv(inv.filter(x=>x.id!==i.id));setMsg(i.name+' deleted')};
+ const buy=(g,rem)=>{const ex=inv.find(i=>nm(i.name)===nm(g.name));setM({key:uid(),gid:g.id,title:'Purchased: add to inventory',init:{name:g.name,cat:ex?ex.cat:CATS[0],qty:String(rem>0?rem:g.qty),unit:g.unit,exp:''}})};
+ const save=it=>{if(m.id)setInv(inv.map(x=>x.id===m.id?{...x,...it}:x));else setInv([{...it,id:uid()},...inv]);
+  if(m.gid)setGro(gro.map(g=>g.id===m.gid?{...g,bought:true}:g));setMsg(m.id?'Item updated':m.gid?'Marked purchased, inventory updated':'Item added');setM(null)};
+ const T=[['home','Dashboard'],['inv','Inventory'],['exp','Expiry'],['rec','Recipes'],['gro','Grocery']];
+ const P={inv,t,onEdit:openEdit,onDel:del};
+ return html`<header class="top"><div class="wrap"><div class="brand"><h1>🥬 Eatwise</h1><span>Eat smarter. Waste less.</span></div>
+ <nav aria-label="Main">${T.map(([k,l])=>html`<button key=${k} aria-current=${v===k?'page':undefined} onClick=${()=>setV(k)}>${l}</button>`)}</nav></div></header>
+ <main class="wrap">${!ls&&html`<div class="note" role="status">Saving is unavailable in this environment, so your changes will be lost when you refresh.</div>`}
+ ${v==='home'&&html`<${Dash} inv=${inv} gro=${gro} t=${t} go=${setV} onAdd=${openAdd}/>`}
+ ${v==='inv'&&html`<${Inventory} ...${P} onAdd=${openAdd}/>`}
+ ${v==='exp'&&html`<${Expiry} ...${P}/>`}
+ ${v==='rec'&&html`<${Recipes} inv=${inv} t=${t}/>`}
+ ${v==='gro'&&html`<${Grocery} gro=${gro} setGro=${setGro} inv=${inv} t=${t} onBuy=${buy} flash=${setMsg}/>`}
+ <footer class="mut" style=${{marginTop:24,textAlign:'center'}}><p>Eatwise · Team Outlier · Team ID EJ26T908927 · Contributor: Satyajit Rao · IIT Eureka Jr</p>
+ <p>${ls?'Data is saved in this browser.':'Data is not being saved.'} ${rs?html`<button class="btn d" onClick=${()=>{const s=seed();setInv(s.inv);setGro([]);setRs(false);setMsg('Sample data restored')}}>Confirm reset</button> <button class="btn" onClick=${()=>setRs(false)}>Cancel</button>`:html`<button class="btn" onClick=${()=>setRs(true)}>Reset to sample data</button>`}</p></footer></main>
+ ${m&&html`<div class="modal" role="dialog" aria-modal="true" aria-label=${m.title}><div class="card sheet"><h2>${m.title}</h2><${ItemForm} key=${m.key} init=${m.init} t=${t} onSave=${save} onClose=${()=>setM(null)}/></div></div>`}
+ ${msg&&html`<div class="toast" role="status">${msg}</div>`}`}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script></body></html>
